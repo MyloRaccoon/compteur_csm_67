@@ -4,95 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compteur vers 16h00</title>
-    <!-- Importation d'une police monospace pour éviter que les chiffres ne "sautent" -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Police monospace pour que les chiffres ne bougent pas -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-color: #e2e8f0;
-            --accent-color: #38bdf8; /* Bleu cyan */
-            --accent-secondary: #f472b6; /* Rose */
+            --text-main: #f8fafc;
+            --text-label: #94a3b8;
+            --color-1: #38bdf8; /* Bleu */
+            --color-2: #4ade80; /* Vert */
+            --color-3: #facc15; /* Jaune */
+            --color-4: #f472b6; /* Rose */
         }
 
         body {
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             font-family: 'JetBrains Mono', monospace;
-            color: var(--text-color);
-            overflow: hidden;
+            color: var(--text-main);
+            text-align: center;
         }
 
         .container {
-            text-align: center;
-            width: 90%;
-            max-width: 1000px;
+            width: 100%;
+            max-width: 600px; /* Limite la largeur sur PC pour rester lisible */
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         h1 {
             font-size: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 40px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-secondary);
-            text-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+            letter-spacing: 3px;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--color-1), var(--color-4));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        /* Style commun pour chaque ligne de compteur */
+        .counter-row {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-color);
+        .counter-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
 
         .label {
             font-size: 0.9rem;
-            color: #94a3b8;
-            margin-bottom: 10px;
+            color: var(--text-label);
             text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
         }
 
         .value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--accent-color);
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            font-size: 3.5rem; /* Taille par défaut pour PC */
+            font-weight: 800;
+            line-height: 1.2;
+            word-break: break-all; /* Permet au nombre de millisecondes de passer à la ligne si trop long */
         }
 
-        /* Style spécifique pour les millisecondes pour qu'elles soient plus petites */
-        .ms-value {
-            font-size: 1.5rem;
-            color: var(--accent-secondary);
-        }
+        /* Couleurs spécifiques pour chaque ligne */
+        .row-1 .value { color: var(--color-1); }
+        .row-2 .value { color: var(--color-2); }
+        .row-3 .value { color: var(--color-3); }
+        .row-4 .value { color: var(--color-4); font-size: 2.5rem; } /* Un peu plus petit pour les ms */
 
-        /* Responsive */
+        /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 600px) {
-            .grid {
-                grid-template-columns: 1fr;
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
             }
+
             .value {
-                font-size: 2rem;
+                font-size: 2.5rem; /* Réduit la taille sur mobile */
+            }
+
+            .row-4 .value {
+                font-size: 1.8rem;
             }
         }
     </style>
@@ -102,30 +108,28 @@
     <div class="container">
         <h1>En attente de 16h00</h1>
         
-        <div class="grid">
-            <!-- Format 1: Heures:Minutes:Secondes -->
-            <div class="card">
-                <div class="label">Format Classique</div>
-                <div class="value" id="hms-display">00:00:00</div>
-            </div>
+        <!-- 1. Format Classique -->
+        <div class="counter-row row-1">
+            <div class="label">Heures : Minutes : Secondes</div>
+            <div class="value" id="hms-display">00:00:00</div>
+        </div>
 
-            <!-- Format 2: Minutes:Secondes -->
-            <div class="card">
-                <div class="label">Minutes restantes</div>
-                <div class="value" id="ms-display">00:00</div>
-            </div>
+        <!-- 2. Minutes restantes -->
+        <div class="counter-row row-2">
+            <div class="label">Minutes : Secondes</div>
+            <div class="value" id="ms-display">00:00</div>
+        </div>
 
-            <!-- Format 3: Secondes totales -->
-            <div class="card">
-                <div class="label">Total Secondes</div>
-                <div class="value" id="s-display">0</div>
-            </div>
+        <!-- 3. Total Secondes -->
+        <div class="counter-row row-3">
+            <div class="label">Total Secondes</div>
+            <div class="value" id="s-display">0</div>
+        </div>
 
-            <!-- Format 4: Millisecondes -->
-            <div class="card">
-                <div class="label">Précision Milliseconde</div>
-                <div class="value ms-value" id="ms-precise-display">000</div>
-            </div>
+        <!-- 4. Total Millisecondes -->
+        <div class="counter-row row-4">
+            <div class="label">Total Millisecondes</div>
+            <div class="value" id="ms-total-display">0</div>
         </div>
     </div>
 
@@ -153,13 +157,12 @@
 
             // Si le temps est écoulé (arrivé à 16h)
             if (diff <= 0) {
-                // On reset pour le lendemain pour que le compteur continue
                 targetTime = getNext16h();
-                // On met à jour les affichages à 0 pour éviter un flash négatif
+                // Reset visuel
                 document.getElementById('hms-display').innerText = "00:00:00";
                 document.getElementById('ms-display').innerText = "00:00";
                 document.getElementById('s-display').innerText = "0";
-                document.getElementById('ms-precise-display').innerText = "000";
+                document.getElementById('ms-total-display').innerText = "0";
                 return;
             }
 
@@ -177,37 +180,33 @@
             // 3. Secondes totales
             const totalSeconds = Math.floor(diff / 1000);
 
-            // 4. Millisecondes (les 3 derniers chiffres)
-            const milliseconds = Math.floor(diff % 1000);
+            // 4. Total Millisecondes (C'est juste la différence brute)
+            const totalMilliseconds = diff;
 
             // --- Affichage ---
             
-            // Fonction utilitaire pour ajouter un zéro devant
             const pad = (num) => num.toString().padStart(2, '0');
-            const padMs = (num) => num.toString().padStart(3, '0');
 
             // 1. HH:MM:SS
             document.getElementById('hms-display').innerText = 
                 `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
-            // 2. MM:SS (Total Minutes)
+            // 2. MM:SS
             document.getElementById('ms-display').innerText = 
                 `${totalMinutes}:${pad(remainingSeconds)}`;
 
-            // 3. Total Secondes
-            document.getElementById('s-display').innerText = totalSeconds;
+            // 3. Total Secondes (avec séparateur de milliers pour la lisibilité)
+            document.getElementById('s-display').innerText = totalSeconds.toLocaleString('fr-FR');
 
-            // 4. Millisecondes
-            document.getElementById('ms-precise-display').innerText = 
-                padMs(milliseconds);
+            // 4. Total Millisecondes (avec séparateur de milliers)
+            document.getElementById('ms-total-display').innerText = totalMilliseconds.toLocaleString('fr-FR');
 
-            // On utilise requestAnimationFrame pour une fluidité maximale
+            // Boucle de rafraîchissement ultra rapide
             requestAnimationFrame(updateCountdown);
         }
 
         // Lancer le compteur
         updateCountdown();
-
     </script>
 </body>
 </html>
